@@ -125,12 +125,17 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate , UIText
         activityViewController.completionWithItemsHandler = {
             (activity, success, items, error) in
             if (success) {
+                self.saveMeme(memedImage)
                 self.dismiss(animated: true, completion: nil)
             }
         }
         present(activityViewController, animated: true, completion: nil)
     }
     
+    
+    func saveMeme(_ image:UIImage){
+        _ = Meme(topText: topText.text!, bottomText: bottomText.text!, originalImage: uiImageView.image!, memedImage: image)
+    }
     func generateMemedImage() -> UIImage {
         // Render view to an image
         navBar.isHidden = true

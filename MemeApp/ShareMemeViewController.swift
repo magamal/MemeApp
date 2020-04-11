@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate , UITextFieldDelegate & UINavigationControllerDelegate {
+class ShareMemeViewController: UIViewController, UIImagePickerControllerDelegate , UITextFieldDelegate & UINavigationControllerDelegate {
     
     
     @IBOutlet weak var uiImageView : UIImageView!
@@ -19,31 +19,30 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate , UIText
     @IBOutlet weak var navBar: UIToolbar!
     @IBOutlet weak var toolBar: UIToolbar!
     
-
     
     let memeTextAttributes: [NSAttributedString.Key: Any] = [
-        
-        NSAttributedString.Key.strokeColor: UIColor.white,
-        NSAttributedString.Key.foregroundColor: UIColor.white,
-        NSAttributedString.Key.font: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
-        NSAttributedString.Key.strokeWidth: 2    ]
+        .strokeColor: UIColor.black,
+        .foregroundColor: UIColor.white,
+        .font: UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
+        .strokeWidth: -4.0
+    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         
         cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
         
         shareButton.isEnabled = false
         
-        topText.defaultTextAttributes = memeTextAttributes
-        bottomText.defaultTextAttributes = memeTextAttributes
-        topText.textAlignment = .center
-        bottomText.textAlignment = .center
-        bottomText.textColor = UIColor.white
-        topText.textColor = UIColor.white
-        topText.delegate = self
-        bottomText.delegate = self
+        setupTextField(topText)
+        setupTextField(bottomText)
+    }
+    
+    func setupTextField(_ textField: UITextField) {
+        textField.defaultTextAttributes = memeTextAttributes
+        textField.textAlignment = .center
+        textField.textColor = UIColor.white
+        textField.delegate = self
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -69,8 +68,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate , UIText
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        self.view.endEditing(true)
-        return false
+        return textField.resignFirstResponder()
     }
     
     func getKeyboardHeight(_ notification:Notification) -> CGFloat {
@@ -93,18 +91,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate , UIText
     }
     
     @IBAction func picImageFromAlbum(_sender: Any){
-        let controller = UIImagePickerController()
-        controller.delegate = self
-        controller.sourceType = .photoLibrary
-        present(controller,animated: true, completion: nil)
+        openImagePicker(sourceType: .photoLibrary)
     }
     
     
     
     @IBAction func picImageFromCamera(_sender: Any){
+        openImagePicker(sourceType: .camera)
+    }
+    
+    func openImagePicker(sourceType:  UIImagePickerController.SourceType){
         let controller = UIImagePickerController()
         controller.delegate = self
-        controller.sourceType = .camera
+        controller.sourceType = sourceType
         present(controller,animated: true, completion: nil)
     }
     
@@ -138,23 +137,20 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate , UIText
     }
     func generateMemedImage() -> UIImage {
         // Render view to an image
-        navBar.isHidden = true
-        toolBar.isHidden = true
+        hideToolbars(true)
         UIGraphicsBeginImageContext(self.view.frame.size)
         view.drawHierarchy(in: self.view.frame, afterScreenUpdates: true)
         let memedImage:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
-        navBar.isHidden = false
-        toolBar.isHidden = false
+        hideToolbars(false)
         
         return memedImage
     }
     
+    func hideToolbars(_ hide: Bool){
+        toolBar.isHidden = hide
+        navBar.isHidden = hide
+    }
+    
 }
 
-struct Meme {
-    let topText: String
-    let bottomText: String
-    let originalImage: UIImage
-    let memedImage:UIImage
-}
